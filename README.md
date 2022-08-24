@@ -1,86 +1,67 @@
-# Example app with styled-components
+# Ember Technical Assessment
 
-This example features how you use a different styling solution than [styled-jsx](https://github.com/vercel/styled-jsx) that also supports universal styles. That means we can serve the required styles for the first render within the HTML and then load the rest in the client. In this case we are using [styled-components](https://github.com/styled-components/styled-components).
+## Current Setup
 
-This example uses the Rust-based [SWC](https://nextjs.org/docs/advanced-features/compiler#styled-components) in Next.js for better performance than Babel.
+This repository has been setup with an almost blank Next.JS project using
+Typescript and Styled Components. As you complete the tasks outlined below
+please use whatever tooling you find most comfortable for styling your frontend
+UI- however we do recommend using Typescript if possible.
 
-Currently, only the `ssr` and `displayName` transforms have been implemented. These two transforms are the main requirement for using `styled-components` in Next.js.
+Additionally feel to free to add any additional tooling that you prefer such
+as husky, eslint, node-fetch etc.
 
-## Deploy your own
+## Technical Approach
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-styled-components)
+Whilst this project is very small and the question set lean- if you are more
+familiar working with more robust solutions such as redux please feel to use
+them if they help you with your solution. Alternatively if you want to keep
+the code lean this is also okay.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-styled-components&project-name=with-styled-components&repository-name=with-styled-components)
+## Tasks
 
-## How to use
+### 1. Setup the /api/weather route
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+Using a free weather API, such as [OpenWeatherMap](https://openweathermap.org/api/one-call-3)
+setup the `api/weather` endpoint to return weather details, please use a
+location of your choosing, no need to process a search query.
 
-```bash
-npx create-next-app --example with-styled-components with-styled-components-app
-```
+Data returned at minimum should be:
 
-```bash
-yarn create next-app --example with-styled-components with-styled-components-app
-```
+- Current Weather
+  - Temperature
+  - Wind Speed & Direction
+  - Descriptive (Cloudy / Partly Sunny / etc.)
+- 5 Day Forecast
+  - Min/Max Temp
+  - Descriptive (Cloudy / Partly Sunny / etc.)
 
-```bash
-pnpm create next-app --example with-styled-components with-styled-components-app
-```
+### 2. Load data from /api/weather in the root next.js route
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+Using any data fetching method of your choose, load the results of the weather
+api into the react app, ready to be rendered into the UI
 
-### Try it on CodeSandbox
+### 3. Create WeatherCard component
 
-[Open this example on CodeSandbox](https://codesandbox.io/s/github/vercel/next.js/tree/canary/examples/with-styled-components)
+Create a styled react component that can display the current weather and 5 day
+forecast based on the data given back by the API.
 
-### Notes
+Feel free to use any icon packages such as `feather-icons` to help create a
+good visual style.
 
-When wrapping a [Link](https://nextjs.org/docs/api-reference/next/link) from `next/link` within a styled-component, the [as](https://styled-components.com/docs/api#as-polymorphic-prop) prop provided by `styled` will collide with the Link's `as` prop and cause styled-components to throw an `Invalid tag` error. To avoid this, you can either use the recommended [forwardedAs](https://styled-components.com/docs/api#forwardedas-prop) prop from styled-components or use a different named prop to pass to a `styled` Link.
+Note: We're not looking for the best designed card, but please try to make it
+easily readable/usable.
 
-<details>
-<summary>Click to expand workaround example</summary>
-<br />
+### 4. Allow refreshing of weather
 
-**components/StyledLink.js**
+Setup a button on the weather card, or elsewhere on the page that can trigger
+a refresh of the current weather API data.
 
-```javascript
-import Link from "next/link";
-import styled from "styled-components";
+### (BONUS) 5. Setup Server Side Rendering
 
-const StyledLink = ({ as, children, className, href }) => (
-  <Link href={href} as={as} passHref>
-    <a className={className}>{children}</a>
-  </Link>
-);
+If not done in task #2, setup the Next.JS route to grab the API data on the
+server-side.
 
-export default styled(StyledLink)`
-  color: #0075e0;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
+### (BONUS) 6. Setup Server Side Cacheing of the API
 
-  &:hover {
-    color: #40a9ff;
-  }
-
-  &:focus {
-    color: #40a9ff;
-    outline: none;
-    border: 0;
-  }
-`;
-```
-
-**pages/index.js**
-
-```javascript
-import StyledLink from "../components/StyledLink";
-
-export default () => (
-  <StyledLink href="/post/[pid]" forwardedAs="/post/abc">
-    First post
-  </StyledLink>
-);
-```
-
-</details>
+Setup a basic file based cache for the weather API route that will cache
+weather data for ~5 minutes.
