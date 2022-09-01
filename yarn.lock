@@ -490,6 +490,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.5":
+  version: 1.11.5
+  resolution: "dayjs@npm:1.11.5"
+  checksum: e3bbaa7b4883b31be4bf75a181f1447fbb19800c29b332852125aab96baeff3ac232dcba8b88c4ea17d3b636c99dac5fb9d1af4bb6ae26615698bbc4a852dffb
+  languageName: node
+  linkType: hard
+
 "debug@npm:^4.1.0":
   version: 4.3.4
   resolution: "debug@npm:4.3.4"
@@ -726,6 +733,7 @@ next@latest:
     "@types/react": ^18.0.14
     "@types/react-dom": ^18.0.5
     "@types/styled-components": ^5.1.25
+    dayjs: ^1.11.5
     next: latest
     react: ^18.2.0
     react-dom: ^18.2.0
