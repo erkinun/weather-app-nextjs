@@ -2,22 +2,14 @@ import Head from "next/head";
 import { useState } from "react";
 
 import WeatherCard from "../components/WeatherCard";
-import { HOSTNAME } from "../config";
+import { fetchWeather } from "../utils/utils";
 
 export default function Home(props: any) {
   const { weather } = props;
 
   const [innerWeather, setWeather] = useState(weather);
-  const onClick = async () => {
-    // TODO encapsulate into a function -> utils
-    const weather = await fetch(`${HOSTNAME}/api/weather`, {
-      method: "GET",
-      headers: new Headers({
-        "Content-Type": "application/json",
-      }),
-    });
-
-    const data = await weather.json();
+  const refreshWeather = async () => {
+    const data = await fetchWeather();
     setWeather(data);
   };
 
@@ -42,33 +34,15 @@ export default function Home(props: any) {
         condition={first}
         wind={wind}
         forecast={forecast}
+        refreshWeather={refreshWeather}
       />
-      {
-        // TODO style this poor guy
-      }
-      <button onClick={onClick}>Refresh</button>
     </>
   );
 }
 
 export async function getServerSideProps({ req, res }) {
-  // TODO check the cache logic - with the readme
-  res.setHeader(
-    "Cache-Control",
-    "public, s-maxage=5, stale-while-revalidate=59",
-  );
-  // TODO check if this is really the correct way of doing this
-  // https://stackoverflow.com/questions/65752932/internal-api-fetch-with-getserversideprops-next-js
-  const weather = await fetch(`${HOSTNAME}/api/weather`, {
-    method: "GET",
-    headers: new Headers({
-      "Content-Type": "application/json",
-    }),
-  });
+  const data = await fetchWeather();
 
-  const data = await weather.json();
-
-  // Pass data to the page via props
   return {
     props: {
       weather: data,

@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
+import { tempSuffix, windDirection, windSpeed } from "../utils/config";
+import { capitalise } from "../utils/utils";
 
 type Main = {
   feels_like: number;
@@ -14,17 +16,25 @@ type Main = {
 type Condition = {
   main: string;
   description: string;
-  icon: string; // TODO maybe remove
+  icon: string;
 };
 
+type Forecast = {
+  index: number;
+  descriptive: Condition;
+  dt: number;
+  max: number;
+  min: number;
+};
+type Forecasts = Array<Forecast>;
 export interface WeatherCardProps {
-  // TODO remove unused
   main: Main;
   date: number;
   city: string;
   wind: { deg: number; speed: number };
   condition: Condition;
-  forecast: Array<{ main: Main; dt: number; weather: Array<Condition> }>;
+  forecast: Forecasts;
+  refreshWeather: () => {};
 }
 
 const HeaderDiv = styled.div`
@@ -54,9 +64,11 @@ const HeaderSpan = styled.span`
   }
 `;
 
-// TODO define interfaces if you can
-// TODO handle the dates
-const Header = ({ city, date }: any) => (
+type HeaderProps = {
+  city: string;
+  date: number;
+};
+const Header: React.FC<HeaderProps> = ({ city, date }: any) => (
   <HeaderDiv>
     <HeaderH1>{city}</HeaderH1>
     <HeaderSpan>as of {new Date(date * 1000).toLocaleTimeString()}</HeaderSpan>
@@ -67,6 +79,10 @@ const TodaySection = styled.section`
   display: flex;
   justify-content: space-between;
   padding: 10px 16px;
+
+  @media (min-width: 768px) {
+    justify-content: space-evenly;
+  }
 `;
 
 const TodayMain = styled.div`
@@ -100,12 +116,6 @@ const WindInfo = styled.div`
   margin-bottom: 5px;
 `;
 
-// TODO look at semantic html
-// TODO look at wind degree conversion
-// TODO prep or write about different units
-// TODO maybe create a utils module
-
-const capitalise = (str) => str[0].toUpperCase() + str.slice(1);
 const Today = ({
   main: { temp, temp_max, temp_min },
   wind: { speed, deg },
@@ -113,13 +123,15 @@ const Today = ({
 }) => (
   <TodaySection>
     <TodayMain>
-      <MainTemp>{Math.floor(temp)} °C</MainTemp>
+      <MainTemp>
+        {Math.floor(temp)} {tempSuffix}
+      </MainTemp>
       <MainInfo>{`${capitalise(description)}`}</MainInfo>
-      <MainInfo>{`Day ${Math.floor(temp_max)}° • Night ${Math.floor(
+      <MainInfo>{`Day ${Math.floor(temp_max)}${tempSuffix} • Night ${Math.floor(
         temp_min,
-      )}°`}</MainInfo>
+      )}${tempSuffix}`}</MainInfo>
       <WindInfo>
-        Wind speed: {speed} with {deg} degrees
+        Wind: {speed} {windSpeed} {windDirection(parseInt(deg))} winds
       </WindInfo>
     </TodayMain>
     <div>
@@ -133,9 +145,6 @@ const ForecastSection = styled.section`
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 10px 16px;
-
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
 `;
 
 const ForecastTitle = styled.h2`
@@ -153,7 +162,6 @@ const ForecastFlex = styled.ul`
   list-style-type: none;
 `;
 
-// TODO remove the border from the last item
 const ForecastListItem = styled.li`
   border-image: linear-gradient(
       180deg,
@@ -170,9 +178,13 @@ const ForecastListItem = styled.li`
   align-items: center;
   text-align: center;
   flex-basis: 20%;
-  justify-content: center;
+  justify-content: initial;
   flex-direction: column;
   font-size: 0.75rem;
+
+  &:last-child {
+    border-right-width: 0px;
+  }
 `;
 
 const ForecastListImage = styled.img`
@@ -188,21 +200,26 @@ const ForecastMax = styled.div`
   }
 `;
 
-// TODO fix the min max temperature
-const Forecast = ({ forecast }) => (
+type ForecastProps = {
+  forecast: Forecasts;
+};
+const Forecast: React.FC<ForecastProps> = ({ forecast: forecasts }) => (
   <ForecastSection>
     <ForecastTitle>5 Day Forecast</ForecastTitle>
     <ForecastFlex>
-      {forecast.map(
-        ({
-          main: { temp_max, temp_min },
-          dt,
-          weather: [{ main, description, icon }],
-        }) => (
+      {forecasts
+        .slice(1)
+        .map(({ max, min, dt, descriptive: { main, description, icon } }) => (
           <ForecastListItem key={dt}>
             <div>{dayjs(new Date(dt * 1000)).format("ddd DD")}</div>
-            <ForecastMax>{Math.floor(temp_max)}°C</ForecastMax>
-            <div>{Math.floor(temp_min)}°C</div>
+            <ForecastMax>
+              {Math.floor(max)}
+              {tempSuffix}
+            </ForecastMax>
+            <div>
+              {Math.floor(min)}
+              {tempSuffix}
+            </div>
             <div>
               <ForecastListImage
                 src={`http://openweathermap.org/img/wn/${icon}@2x.png`}
@@ -211,13 +228,27 @@ const Forecast = ({ forecast }) => (
             </div>
             <div>{capitalise(description)}</div>
           </ForecastListItem>
-        ),
-      )}
+        ))}
     </ForecastFlex>
   </ForecastSection>
 );
 
-// TODO add storyboard - readme
+const Button = styled.button`
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 6px;
+  color: #fff;
+  padding: 10px 15px;
+  margin: 10px 15px;
+
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-right: 10px;
+
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+`;
+
 const WeatherCard: React.FC<WeatherCardProps> = ({
   main,
   date,
@@ -225,12 +256,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   wind,
   condition,
   forecast,
+  refreshWeather,
 }) => {
   return (
     <WeatherCardWrapper>
       <Header city={city} date={date} />
       <Today main={main} wind={wind} condition={condition} />
       <Forecast forecast={forecast} />
+      <Button onClick={refreshWeather}>Refresh</Button>
     </WeatherCardWrapper>
   );
 };
