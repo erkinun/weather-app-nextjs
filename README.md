@@ -66,12 +66,7 @@ easily readable/usable.
 Setup a button on the weather card, or elsewhere on the page that can trigger
 a refresh of the current weather API data.
 
-### (BONUS) 5. Setup Server Side Rendering
-
-If not done in task #2, setup the Next.JS route to grab the API data on the
-server-side.
-
-### (BONUS) 6. Setup Server Side Cacheing of the API
+### (BONUS) 5. Setup Server Side Cacheing of the API
 
 Setup a basic file based cache for the weather API route that will cache
 weather data for ~5 minutes.
