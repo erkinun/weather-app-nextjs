@@ -27,11 +27,13 @@ type Forecast = {
   min: number;
 };
 type Forecasts = Array<Forecast>;
+
+type Wind = { deg: number; speed: number };
 export interface WeatherCardProps {
   main: Main;
   date: number;
   city: string;
-  wind: { deg: number; speed: number };
+  wind: Wind;
   condition: Condition;
   forecast: Forecasts;
   refreshWeather: () => {};
@@ -116,7 +118,13 @@ const WindInfo = styled.div`
   margin-bottom: 5px;
 `;
 
-const Today = ({
+type TodayProps = {
+  main: Main;
+  wind: Wind;
+  condition: Condition;
+};
+
+const Today: React.FC<TodayProps> = ({
   main: { temp, temp_max, temp_min },
   wind: { speed, deg },
   condition: { main, description, icon },
@@ -131,7 +139,7 @@ const Today = ({
         temp_min,
       )}${tempSuffix}`}</MainInfo>
       <WindInfo>
-        Wind: {speed} {windSpeed} {windDirection(parseInt(deg))} winds
+        Wind: {speed} {windSpeed} {windDirection(deg)} winds
       </WindInfo>
     </TodayMain>
     <div>

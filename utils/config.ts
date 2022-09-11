@@ -2,7 +2,14 @@ export const HOSTNAME = process.env.HOSTNAME || "http://localhost:3000";
 
 export const API_KEY = process.env.API_KEY || console.warn("NO API KEY FOUND");
 
-const units = {
+type unitOptions = {
+  [key: string]: {
+    temperature: string;
+    wind: string;
+  };
+};
+
+const units: unitOptions = {
   metric: {
     temperature: "°C",
     wind: "m/s",

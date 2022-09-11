@@ -40,7 +40,7 @@ export default function Home(props: any) {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps() {
   const data = await fetchWeather();
 
   return {
