@@ -23,14 +23,20 @@ type SortTemp = {
 };
 
 export const fetchWeather = async () => {
+  const geoResponse = await fetch(
+    `http://api.openweathermap.org/geo/1.0/direct?q=london&appid=${API_KEY}`,
+  );
+
+  // reading the first response from the geo api
+  const [{ name: locationName, lat, lon }] = await geoResponse.json();
   const weatherResponse = await fetch(
-    `http://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=${API_KEY}&units=metric`,
+    `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
   );
   const { main, weather, wind, name, dt } = await weatherResponse.json();
 
   // 5 day forecast is available at any location on the globe. It includes weather forecast data with 3-hour step.
   const forecast = await fetch(
-    `http://api.openweathermap.org/data/2.5/forecast?q=London,uk&APPID=${API_KEY}&units=metric`,
+    `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
   );
 
   const { list } = await forecast.json();
