@@ -2,14 +2,14 @@ import Head from "next/head";
 import { useState } from "react";
 
 import WeatherCard from "../components/WeatherCard";
-import { fetchWeather } from "../utils/utils";
+import { fetchWeather, fetchWeatherApi } from "../utils/utils";
 
 export default function Home(props: any) {
   const { weather } = props;
 
   const [innerWeather, setWeather] = useState(weather);
   const refreshWeather = async () => {
-    const data = await fetchWeather();
+    const data = await fetchWeatherApi();
     setWeather(data);
   };
 
