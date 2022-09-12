@@ -8,12 +8,13 @@ export default function Home(props: any) {
   const { weather } = props;
 
   const [innerWeather, setWeather] = useState(weather);
-  const refreshWeather = async () => {
-    const data = await fetchWeatherApi();
+  const refreshWeather = async (location: string = "london") => {
+    const data = await fetchWeatherApi(location);
     setWeather(data);
   };
 
   const {
+    locationName,
     main,
     dt,
     name,
@@ -21,6 +22,8 @@ export default function Home(props: any) {
     wind,
     forecast,
   } = innerWeather;
+
+  // TODO loading animation with wireframe
   return (
     <>
       <Head>
@@ -28,13 +31,14 @@ export default function Home(props: any) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WeatherCard
+        searchLocation={(loc: string) => refreshWeather(loc)}
+        locationName={locationName}
         main={main}
         date={dt}
         city={name}
         condition={first}
         wind={wind}
         forecast={forecast}
-        refreshWeather={refreshWeather}
       />
     </>
   );

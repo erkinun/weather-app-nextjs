@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { fetchWeather, groupBy } from "../../utils/utils";
+import { fetchWeather } from "../../utils/utils";
 import { fetchFromCache, saveToCache } from "./cache";
 
 interface WeatherResponse {}
@@ -11,10 +11,18 @@ const fetchApi = async (
 ) => {
   let data;
 
-  data = await fetchFromCache();
+  data = null;
 
   if (!data) {
-    data = await fetchWeather();
+    const { location } = req.query;
+    let q;
+
+    if (Array.isArray(location)) {
+      q = location[0];
+    } else {
+      q = location;
+    }
+    data = await fetchWeather(q);
   }
 
   !data.ts && saveToCache(data);

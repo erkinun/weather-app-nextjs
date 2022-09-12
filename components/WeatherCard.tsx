@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import Image from "next/image";
@@ -30,14 +30,20 @@ type Forecast = {
 type Forecasts = Array<Forecast>;
 
 type Wind = { deg: number; speed: number };
+// TODO change wind speed to km/h
+// TODO there's an error with the main temperature reading, check out forecast too
+// TODO figure out why the icons change from day to night
+// TODO start using the locationName, or rename city bc you might search for a neighbourhood
+// TODO or directly use the geolocation api first, and then search for the place maybe
 export interface WeatherCardProps {
+  locationName: string;
   main: Main;
   date: number;
   city: string;
   wind: Wind;
   condition: Condition;
   forecast: Forecasts;
-  refreshWeather: () => {};
+  searchLocation: (loc: string) => {};
 }
 
 const HeaderDiv = styled.div`
@@ -67,15 +73,46 @@ const HeaderSpan = styled.span`
   }
 `;
 
+const HeaderSearch = styled.section``;
+
 type HeaderProps = {
   city: string;
   date: number;
+  onSearch: () => void;
 };
-const Header: React.FC<HeaderProps> = ({ city, date }: any) => (
-  <HeaderDiv>
-    <HeaderH1>{city}</HeaderH1>
-    <HeaderSpan>as of {new Date(date * 1000).toLocaleTimeString()}</HeaderSpan>
-  </HeaderDiv>
+const Header = React.forwardRef<HTMLInputElement, HeaderProps>(
+  ({ city, date, onSearch }, ref) => {
+    const [timeoutId, setTimeoutId] = useState(0);
+
+    const handleKey = (key: string) => {
+      if (key === "Enter") {
+        onSearch();
+      } else {
+        timeoutId && clearTimeout(timeoutId);
+        const id = window.setTimeout(() => onSearch(), 500);
+        setTimeoutId(id);
+      }
+    };
+    return (
+      <HeaderDiv>
+        <HeaderSearch>
+          <input
+            ref={ref}
+            onKeyDown={(e) => handleKey(e.key)}
+            onBlur={() => onSearch()}
+            type="text"
+            placeholder="Search for an address"
+          />
+          <input type="checkbox" name="location" />{" "}
+          <label htmlFor="location">Use my location</label>
+        </HeaderSearch>
+        <HeaderH1>{city}</HeaderH1>
+        <HeaderSpan>
+          as of {new Date(date * 1000).toLocaleTimeString()}
+        </HeaderSpan>
+      </HeaderDiv>
+    );
+  },
 );
 
 const TodaySection = styled.section`
@@ -248,6 +285,8 @@ const Forecast: React.FC<ForecastProps> = ({ forecast: forecasts }) => (
   </ForecastSection>
 );
 
+// TODO best practice for styled components?
+// TODO best practice for nextjs apps?
 const Button = styled.button`
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 6px;
@@ -267,18 +306,28 @@ const Button = styled.button`
 const WeatherCard: React.FC<WeatherCardProps> = ({
   main,
   date,
-  city,
   wind,
   condition,
   forecast,
-  refreshWeather,
+  searchLocation,
+  locationName,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleSearch = () => {
+    const searchVal = inputRef?.current?.value;
+    searchVal && searchVal !== "" && searchLocation(searchVal);
+  };
   return (
     <WeatherCardWrapper>
-      <Header city={city} date={date} />
+      <Header
+        ref={inputRef}
+        city={locationName}
+        date={date}
+        onSearch={handleSearch}
+      />
       <Today main={main} wind={wind} condition={condition} />
       <Forecast forecast={forecast} />
-      <Button onClick={refreshWeather}>Refresh</Button>
+      <Button onClick={handleSearch}>Refresh</Button>
     </WeatherCardWrapper>
   );
 };

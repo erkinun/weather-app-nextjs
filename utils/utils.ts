@@ -3,8 +3,8 @@ import { API_KEY } from "./config";
 export const capitalise = (str: string) =>
   str && str.length > 0 && str[0]?.toUpperCase() + str.slice(1);
 
-export const fetchWeatherApi = async () => {
-  const weather = await fetch(`./api/weather`, {
+export const fetchWeatherApi = async (location?: string) => {
+  const weather = await fetch(`./api/weather?location=${location}`, {
     method: "GET",
     headers: new Headers({
       "Content-Type": "application/json",
@@ -22,9 +22,9 @@ type SortTemp = {
   };
 };
 
-export const fetchWeather = async () => {
+export const fetchWeather = async (loc: string = "london") => {
   const geoResponse = await fetch(
-    `http://api.openweathermap.org/geo/1.0/direct?q=london&appid=${API_KEY}`,
+    `http://api.openweathermap.org/geo/1.0/direct?q=${loc}&appid=${API_KEY}`,
   );
 
   // reading the first response from the geo api
@@ -74,6 +74,7 @@ export const fetchWeather = async () => {
     .sort((a, b) => a.dt - b.dt);
 
   return {
+    locationName,
     main,
     dt,
     weather,
