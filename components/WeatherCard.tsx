@@ -44,6 +44,7 @@ export interface WeatherCardProps {
   condition: Condition;
   forecast: Forecasts;
   searchLocation: (loc: string) => {};
+  searchGeoloc: (lat: number, lon: number) => {};
 }
 
 const HeaderDiv = styled.div`
@@ -73,47 +74,102 @@ const HeaderSpan = styled.span`
   }
 `;
 
-const HeaderSearch = styled.section``;
+const HeaderSearch = styled.section`
+  @media (min-width: 768px) {
+    display: flex;
+  }
+
+  input[type="text"] {
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    border: 0;
+    border-radius: 6px;
+    box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.5);
+    width: 100%;
+
+    font-family: inherit;
+    font-size: inherit;
+
+    @media (min-width: 768px) {
+      width: 300px;
+    }
+  }
+`;
+
+const GeoSection = styled.section`
+  padding: 10px 0;
+  margin: 10px 0;
+
+  @media (min-width: 768px) {
+    padding: 10px;
+  }
+`;
 
 type HeaderProps = {
   city: string;
   date: number;
   onSearch: () => void;
+  onGeoLoc: (coords: { lat: number; lon: number }) => void;
 };
-const Header = React.forwardRef<HTMLInputElement, HeaderProps>(
-  ({ city, date, onSearch }, ref) => {
-    const [timeoutId, setTimeoutId] = useState(0);
+const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
+  { city, date, onSearch, onGeoLoc },
+  ref,
+) {
+  const [timeoutId, setTimeoutId] = useState(0);
 
-    const handleKey = (key: string) => {
-      if (key === "Enter") {
-        onSearch();
-      } else {
-        timeoutId && clearTimeout(timeoutId);
-        const id = window.setTimeout(() => onSearch(), 500);
-        setTimeoutId(id);
-      }
-    };
-    return (
-      <HeaderDiv>
-        <HeaderSearch>
+  const handleKey = (key: string) => {
+    if (key === "Enter") {
+      onSearch();
+    } else {
+      timeoutId && clearTimeout(timeoutId);
+      const id = window.setTimeout(() => onSearch(), 500);
+      setTimeoutId(id);
+    }
+  };
+
+  const turnOnGeoLoc = (checked: Boolean) => {
+    if (checked) {
+      navigator.geolocation.getCurrentPosition(
+        function success(position) {
+          onGeoLoc({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        function error(e) {
+          console.log("some kind of failure: ", e);
+        },
+      );
+    }
+  };
+  return (
+    <HeaderDiv>
+      <HeaderSearch>
+        <input
+          ref={ref}
+          onKeyDown={(e) => handleKey(e.key)}
+          onBlur={() => onSearch()}
+          type="text"
+          name="location"
+          placeholder="Search for an address"
+        />
+        <GeoSection>
           <input
-            ref={ref}
-            onKeyDown={(e) => handleKey(e.key)}
-            onBlur={() => onSearch()}
-            type="text"
-            placeholder="Search for an address"
+            type="checkbox"
+            name="geoLocation"
+            onChange={(e) => turnOnGeoLoc(e.target.checked)}
           />
-          <input type="checkbox" name="location" />{" "}
           <label htmlFor="location">Use my location</label>
-        </HeaderSearch>
-        <HeaderH1>{city}</HeaderH1>
-        <HeaderSpan>
-          as of {new Date(date * 1000).toLocaleTimeString()}
-        </HeaderSpan>
-      </HeaderDiv>
-    );
-  },
-);
+        </GeoSection>
+      </HeaderSearch>
+      <HeaderH1>{city}</HeaderH1>
+      <HeaderSpan>
+        as of {new Date(date * 1000).toLocaleTimeString()}
+      </HeaderSpan>
+    </HeaderDiv>
+  );
+});
 
 const TodaySection = styled.section`
   display: flex;
@@ -190,7 +246,6 @@ const Today: React.FC<TodayProps> = ({
     </div>
   </TodaySection>
 );
-
 
 const ForecastSection = styled.section`
   background-color: rgba(255, 255, 255, 0.2);
@@ -310,12 +365,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   condition,
   forecast,
   searchLocation,
+  searchGeoloc,
   locationName,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const handleSearch = () => {
     const searchVal = inputRef?.current?.value;
     searchVal && searchVal !== "" && searchLocation(searchVal);
+  };
+  const handleGeoLoc = ({ lat, lon }: { lat: number; lon: number }) => {
+    lat && lon && searchGeoloc(lat, lon);
   };
   return (
     <WeatherCardWrapper>
@@ -324,6 +383,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
         city={locationName}
         date={date}
         onSearch={handleSearch}
+        onGeoLoc={handleGeoLoc}
       />
       <Today main={main} wind={wind} condition={condition} />
       <Forecast forecast={forecast} />

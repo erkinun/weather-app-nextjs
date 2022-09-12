@@ -1,6 +1,11 @@
+export const isServer = () => {
+  return !(typeof window != "undefined" && window.document);
+};
+
 export const HOSTNAME = process.env.HOSTNAME || "http://localhost:3000";
 
-export const API_KEY = process.env.API_KEY || console.warn("NO API KEY FOUND");
+export const API_KEY =
+  isServer() && (process.env.API_KEY ?? console.warn("NO API KEY FOUND"));
 
 type unitOptions = {
   [key: string]: {

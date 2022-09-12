@@ -14,7 +14,8 @@ const fetchApi = async (
   data = null;
 
   if (!data) {
-    const { location } = req.query;
+    // TODO put the cache back at some point
+    const { location, lat, lon } = req.query;
     let q;
 
     if (Array.isArray(location)) {
@@ -22,7 +23,7 @@ const fetchApi = async (
     } else {
       q = location;
     }
-    data = await fetchWeather(q);
+    data = await fetchWeather(q, parseFloat(lat), parseFloat(lon));
   }
 
   !data.ts && saveToCache(data);

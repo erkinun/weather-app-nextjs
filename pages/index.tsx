@@ -4,13 +4,17 @@ import { useState } from "react";
 import WeatherCard from "../components/WeatherCard";
 import { fetchWeather, fetchWeatherApi } from "../utils/utils";
 
+type RefreshParameters = string | { lat: number; lon: number };
+
 export default function Home(props: any) {
   const { weather } = props;
 
   const [innerWeather, setWeather] = useState(weather);
-  const refreshWeather = async (location: string = "london") => {
-    const data = await fetchWeatherApi(location);
-    setWeather(data);
+  const refreshWeather = async (params: RefreshParameters) => {
+    const data = await fetchWeatherApi(params);
+    if (!data.error) {
+      setWeather(data);
+    }
   };
 
   const {
@@ -32,6 +36,9 @@ export default function Home(props: any) {
       </Head>
       <WeatherCard
         searchLocation={(loc: string) => refreshWeather(loc)}
+        searchGeoloc={(lat: number, lon: number) =>
+          refreshWeather({ lat, lon })
+        }
         locationName={locationName}
         main={main}
         date={dt}
