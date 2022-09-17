@@ -5,7 +5,7 @@ import { fetchFromCache, saveToCache } from "./cache";
 
 interface WeatherResponse {}
 
-export default async (
+const fetchApi = async (
   req: NextApiRequest,
   res: NextApiResponse<WeatherResponse>,
 ) => {
@@ -23,3 +23,5 @@ export default async (
     ...data,
   });
 };
+
+export default fetchApi;

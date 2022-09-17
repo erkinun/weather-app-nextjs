@@ -5,6 +5,9 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  images: {
+    domains: ["openweathermap.org"],
+  },
 };
 
 module.exports = nextConfig;

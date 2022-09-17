@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
+import Image from "next/image";
 import { tempSuffix, windDirection, windSpeed } from "../utils/config";
 import { capitalise } from "../utils/utils";
 
@@ -143,10 +144,16 @@ const Today: React.FC<TodayProps> = ({
       </WindInfo>
     </TodayMain>
     <div>
-      <img src={`http://openweathermap.org/img/wn/${icon}@2x.png`} alt={main} />
+      <Image
+        src={`http://openweathermap.org/img/wn/${icon}@2x.png`}
+        alt={main}
+        width={100}
+        height={100}
+      />
     </div>
   </TodaySection>
 );
+
 
 const ForecastSection = styled.section`
   background-color: rgba(255, 255, 255, 0.2);

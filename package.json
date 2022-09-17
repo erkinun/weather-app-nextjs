@@ -3,7 +3,10 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "prettier-format": "prettier --config .prettierrc '**/*.{ts,tsx}' --write",
+    "prepare": "husky install"
   },
   "dependencies": {
     "dayjs": "^1.11.5",
@@ -18,6 +21,12 @@
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "@types/styled-components": "^5.1.25",
+    "eslint": "8.23.1",
+    "eslint-config-next": "12.3.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
     "typescript": "^4.7.4"
   },
   "packageManager": "yarn@3.2.2"
