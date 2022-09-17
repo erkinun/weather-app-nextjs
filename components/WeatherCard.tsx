@@ -147,6 +147,8 @@ const Today: React.FC<TodayProps> = ({
       <Image
         src={`http://openweathermap.org/img/wn/${icon}@2x.png`}
         alt={main}
+        width={100}
+        height={100}
       />
     </div>
   </TodaySection>
