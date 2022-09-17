@@ -152,6 +152,7 @@ const Today: React.FC<TodayProps> = ({
   </TodaySection>
 );
 
+
 const ForecastSection = styled.section`
   background-color: rgba(255, 255, 255, 0.2);
   -webkit-backdrop-filter: blur(10px);
