@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { fetchWeather } from "../../utils/utils";
-import { fetchFromCache, saveToCache } from "./cache";
+import { fetchWeather, getFromArrayOrUndefined } from "../../utils/utils";
 
 interface WeatherResponse {}
 
@@ -23,10 +22,12 @@ const fetchApi = async (
     } else {
       q = location;
     }
-    data = await fetchWeather(q, parseFloat(lat), parseFloat(lon));
+    data = await fetchWeather(
+      q,
+      parseFloat(getFromArrayOrUndefined(lat, "0")),
+      parseFloat(getFromArrayOrUndefined(lon, "0")),
+    );
   }
-
-  !data.ts && saveToCache(data);
 
   res.status(200).json({
     ...data,

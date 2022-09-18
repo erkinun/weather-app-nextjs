@@ -133,3 +133,18 @@ export const groupBy = function (xs: Array<any>, key: string) {
     return rv;
   }, {});
 };
+
+export const getFromArrayOrUndefined = (
+  val: string | string[] | undefined,
+  defVal: string,
+): string => {
+  if (val) {
+    if (Array.isArray(val)) {
+      return val[0]!;
+    } else {
+      return val;
+    }
+  } else {
+    return defVal;
+  }
+};

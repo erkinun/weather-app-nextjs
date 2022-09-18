@@ -33,8 +33,8 @@ type Wind = { deg: number; speed: number };
 // TODO change wind speed to km/h
 // TODO there's an error with the main temperature reading, check out forecast too
 // TODO figure out why the icons change from day to night
-// TODO start using the locationName, or rename city bc you might search for a neighbourhood
-// TODO or directly use the geolocation api first, and then search for the place maybe
+// TODO replace the icons with something nicer
+// TODO divide the components into their own files
 export interface WeatherCardProps {
   locationName: string;
   main: Main;
