@@ -4,16 +4,21 @@ import { useState } from "react";
 import WeatherCard from "../components/WeatherCard";
 import { fetchWeather, fetchWeatherApi } from "../utils/utils";
 
+type RefreshParameters = string | { lat: number; lon: number };
+
 export default function Home(props: any) {
   const { weather } = props;
 
   const [innerWeather, setWeather] = useState(weather);
-  const refreshWeather = async () => {
-    const data = await fetchWeatherApi();
-    setWeather(data);
+  const refreshWeather = async (params: RefreshParameters) => {
+    const data = await fetchWeatherApi(params);
+    if (!data.error) {
+      setWeather(data);
+    }
   };
 
   const {
+    locationName,
     main,
     dt,
     name,
@@ -21,6 +26,8 @@ export default function Home(props: any) {
     wind,
     forecast,
   } = innerWeather;
+
+  // TODO loading animation with wireframe
   return (
     <>
       <Head>
@@ -28,13 +35,17 @@ export default function Home(props: any) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WeatherCard
+        searchLocation={(loc: string) => refreshWeather(loc)}
+        searchGeoloc={(lat: number, lon: number) =>
+          refreshWeather({ lat, lon })
+        }
+        locationName={locationName}
         main={main}
         date={dt}
         city={name}
         condition={first}
         wind={wind}
         forecast={forecast}
-        refreshWeather={refreshWeather}
       />
     </>
   );

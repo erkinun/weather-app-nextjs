@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import Image from "next/image";
@@ -30,14 +30,21 @@ type Forecast = {
 type Forecasts = Array<Forecast>;
 
 type Wind = { deg: number; speed: number };
+// TODO change wind speed to km/h
+// TODO there's an error with the main temperature reading, check out forecast too
+// TODO figure out why the icons change from day to night
+// TODO replace the icons with something nicer
+// TODO divide the components into their own files
 export interface WeatherCardProps {
+  locationName: string;
   main: Main;
   date: number;
   city: string;
   wind: Wind;
   condition: Condition;
   forecast: Forecasts;
-  refreshWeather: () => {};
+  searchLocation: (loc: string) => {};
+  searchGeoloc: (lat: number, lon: number) => {};
 }
 
 const HeaderDiv = styled.div`
@@ -67,16 +74,102 @@ const HeaderSpan = styled.span`
   }
 `;
 
+const HeaderSearch = styled.section`
+  @media (min-width: 768px) {
+    display: flex;
+  }
+
+  input[type="text"] {
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    border: 0;
+    border-radius: 6px;
+    box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.5);
+    width: 100%;
+
+    font-family: inherit;
+    font-size: inherit;
+
+    @media (min-width: 768px) {
+      width: 300px;
+    }
+  }
+`;
+
+const GeoSection = styled.section`
+  padding: 10px 0;
+  margin: 10px 0;
+
+  @media (min-width: 768px) {
+    padding: 10px;
+  }
+`;
+
 type HeaderProps = {
   city: string;
   date: number;
+  onSearch: () => void;
+  onGeoLoc: (coords: { lat: number; lon: number }) => void;
 };
-const Header: React.FC<HeaderProps> = ({ city, date }: any) => (
-  <HeaderDiv>
-    <HeaderH1>{city}</HeaderH1>
-    <HeaderSpan>as of {new Date(date * 1000).toLocaleTimeString()}</HeaderSpan>
-  </HeaderDiv>
-);
+const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
+  { city, date, onSearch, onGeoLoc },
+  ref,
+) {
+  const [timeoutId, setTimeoutId] = useState(0);
+
+  const handleKey = (key: string) => {
+    if (key === "Enter") {
+      onSearch();
+    } else {
+      timeoutId && clearTimeout(timeoutId);
+      const id = window.setTimeout(() => onSearch(), 500);
+      setTimeoutId(id);
+    }
+  };
+
+  const turnOnGeoLoc = (checked: Boolean) => {
+    if (checked) {
+      navigator.geolocation.getCurrentPosition(
+        function success(position) {
+          onGeoLoc({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        function error(e) {
+          console.log("some kind of failure: ", e);
+        },
+      );
+    }
+  };
+  return (
+    <HeaderDiv>
+      <HeaderSearch>
+        <input
+          ref={ref}
+          onKeyDown={(e) => handleKey(e.key)}
+          onBlur={() => onSearch()}
+          type="text"
+          name="location"
+          placeholder="Search for an address"
+        />
+        <GeoSection>
+          <input
+            type="checkbox"
+            name="geoLocation"
+            onChange={(e) => turnOnGeoLoc(e.target.checked)}
+          />
+          <label htmlFor="location">Use my location</label>
+        </GeoSection>
+      </HeaderSearch>
+      <HeaderH1>{city}</HeaderH1>
+      <HeaderSpan>
+        as of {new Date(date * 1000).toLocaleTimeString()}
+      </HeaderSpan>
+    </HeaderDiv>
+  );
+});
 
 const TodaySection = styled.section`
   display: flex;
@@ -153,7 +246,6 @@ const Today: React.FC<TodayProps> = ({
     </div>
   </TodaySection>
 );
-
 
 const ForecastSection = styled.section`
   background-color: rgba(255, 255, 255, 0.2);
@@ -248,6 +340,8 @@ const Forecast: React.FC<ForecastProps> = ({ forecast: forecasts }) => (
   </ForecastSection>
 );
 
+// TODO best practice for styled components?
+// TODO best practice for nextjs apps?
 const Button = styled.button`
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 6px;
@@ -267,18 +361,33 @@ const Button = styled.button`
 const WeatherCard: React.FC<WeatherCardProps> = ({
   main,
   date,
-  city,
   wind,
   condition,
   forecast,
-  refreshWeather,
+  searchLocation,
+  searchGeoloc,
+  locationName,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleSearch = () => {
+    const searchVal = inputRef?.current?.value;
+    searchVal && searchVal !== "" && searchLocation(searchVal);
+  };
+  const handleGeoLoc = ({ lat, lon }: { lat: number; lon: number }) => {
+    lat && lon && searchGeoloc(lat, lon);
+  };
   return (
     <WeatherCardWrapper>
-      <Header city={city} date={date} />
+      <Header
+        ref={inputRef}
+        city={locationName}
+        date={date}
+        onSearch={handleSearch}
+        onGeoLoc={handleGeoLoc}
+      />
       <Today main={main} wind={wind} condition={condition} />
       <Forecast forecast={forecast} />
-      <Button onClick={refreshWeather}>Refresh</Button>
+      <Button onClick={handleSearch}>Refresh</Button>
     </WeatherCardWrapper>
   );
 };

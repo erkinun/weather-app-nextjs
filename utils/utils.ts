@@ -1,15 +1,32 @@
 import { API_KEY } from "./config";
 
+export const isServer = () => {
+  return !(typeof window != "undefined" && window.document);
+};
+
 export const capitalise = (str: string) =>
   str && str.length > 0 && str[0]?.toUpperCase() + str.slice(1);
 
-export const fetchWeatherApi = async () => {
-  const weather = await fetch(`./api/weather`, {
-    method: "GET",
-    headers: new Headers({
-      "Content-Type": "application/json",
-    }),
-  });
+type RefreshParameters = string | { lat: number; lon: number };
+
+export const fetchWeatherApi = async (params: RefreshParameters) => {
+  let weather;
+  if (typeof params === "string") {
+    weather = await fetch(`./api/weather?location=${params}`, {
+      method: "GET",
+      headers: new Headers({
+        "Content-Type": "application/json",
+      }),
+    });
+  } else {
+    const { lat, lon } = params;
+    weather = await fetch(`./api/weather?lat=${lat}&lon=${lon}`, {
+      method: "GET",
+      headers: new Headers({
+        "Content-Type": "application/json",
+      }),
+    });
+  }
 
   const data = await weather.json();
   return data;
@@ -22,13 +39,39 @@ type SortTemp = {
   };
 };
 
-export const fetchWeather = async () => {
-  const geoResponse = await fetch(
-    `http://api.openweathermap.org/geo/1.0/direct?q=london&appid=${API_KEY}`,
-  );
+export const fetchWeather = async (
+  loc: string = "london",
+  latParam?: number,
+  lonParam?: number,
+) => {
+  let geoResult;
 
-  // reading the first response from the geo api
-  const [{ name: locationName, lat, lon }] = await geoResponse.json();
+  if (latParam && lonParam) {
+    console.log("we are in reverse geo fetch");
+    const geoResponse = await fetch(
+      `http://api.openweathermap.org/geo/1.0/reverse?lat=${latParam}&lon=${lonParam}&appid=${API_KEY}`,
+    );
+
+    // reading the first response from the geo api
+    geoResult = await geoResponse.json();
+
+    if (geoResult.length === 0) {
+      return { error: "Location not found" };
+    }
+  } else {
+    const geoResponse = await fetch(
+      `http://api.openweathermap.org/geo/1.0/direct?q=${loc}&appid=${API_KEY}`,
+    );
+
+    // reading the first response from the geo api
+    geoResult = await geoResponse.json();
+
+    if (geoResult.length === 0) {
+      return { error: "Location not found" };
+    }
+  }
+
+  const [{ name: locationName, lat, lon }] = geoResult;
   const weatherResponse = await fetch(
     `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
   );
@@ -74,6 +117,7 @@ export const fetchWeather = async () => {
     .sort((a, b) => a.dt - b.dt);
 
   return {
+    locationName,
     main,
     dt,
     weather,
@@ -88,4 +132,19 @@ export const groupBy = function (xs: Array<any>, key: string) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
+};
+
+export const getFromArrayOrUndefined = (
+  val: string | string[] | undefined,
+  defVal: string,
+): string => {
+  if (val) {
+    if (Array.isArray(val)) {
+      return val[0]!;
+    } else {
+      return val;
+    }
+  } else {
+    return defVal;
+  }
 };

@@ -3,6 +3,8 @@ import fs from "fs";
 const cachePath = "./.cache";
 const FIVE_MINUTES = 5 * 60 * 1000; // ms
 
+// TODO this would have other peoples cache : )
+// TODO search by location or latlong
 export const fetchFromCache = () => {
   if (fs.existsSync(cachePath)) {
     const data = fs.readFileSync(cachePath, { encoding: "utf-8" });
