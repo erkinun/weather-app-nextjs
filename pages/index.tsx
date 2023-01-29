@@ -9,16 +9,13 @@ type RefreshParameters = string | { lat: number; lon: number };
 export default function Home(props: any) {
   const { weather } = props;
 
-  console.log({ weather })
-
   const [innerWeather, setWeather] = useState(weather);
   const refreshWeather = async (params: RefreshParameters) => {
     const data = await fetchWeatherApi(params);
     if (!data.error) {
       setWeather(data);
-    }
-    else {
-      console.error(data.error)
+    } else {
+      console.error(data.error);
     }
   };
 
