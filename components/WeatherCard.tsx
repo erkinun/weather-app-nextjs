@@ -1,8 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import Image from "next/image";
-import { tempSuffix, windDirection, windSpeed } from "../utils/config";
+import {
+  tempSuffix,
+  windDirection,
+  windSpeed as windSpeedUnit,
+} from "../utils/config";
 import { capitalise } from "../utils/utils";
 
 type Main = {
@@ -53,6 +57,11 @@ const HeaderDiv = styled.div`
   border-top-right-radius: 6px;
   color: #fff;
   padding: 10px 15px;
+`;
+
+const CityTimeSection = styled.section`
+  display: flex;
+  align-items: center;
 `;
 
 const HeaderH1 = styled.div`
@@ -132,6 +141,7 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
     if (checked) {
       navigator.geolocation.getCurrentPosition(
         function success(position) {
+          console.log({ position });
           onGeoLoc({
             lat: position.coords.latitude,
             lon: position.coords.longitude,
@@ -142,7 +152,13 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
         },
       );
     }
+    localStorage.setItem("geoLocation", checked.toString());
+    setGeoLocation(checked);
   };
+  const [geoLocation, setGeoLocation] = useState<boolean>(false);
+  useEffect(() => {
+    setGeoLocation(localStorage.getItem("geoLocation") === "true");
+  }, []);
   return (
     <HeaderDiv>
       <HeaderSearch>
@@ -156,6 +172,7 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
         />
         <GeoSection>
           <input
+            checked={geoLocation}
             type="checkbox"
             name="geoLocation"
             onChange={(e) => turnOnGeoLoc(e.target.checked)}
@@ -163,10 +180,12 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
           <label htmlFor="location">Use my location</label>
         </GeoSection>
       </HeaderSearch>
-      <HeaderH1>{city}</HeaderH1>
-      <HeaderSpan>
-        as of {new Date(date * 1000).toLocaleTimeString()}
-      </HeaderSpan>
+      <CityTimeSection>
+        <HeaderH1>{city}</HeaderH1>
+        <HeaderSpan>
+          as of {new Date(date * 1000).toLocaleTimeString()}
+        </HeaderSpan>
+      </CityTimeSection>
     </HeaderDiv>
   );
 });
@@ -218,6 +237,9 @@ type TodayProps = {
   condition: Condition;
 };
 
+const convertMetersPerSecondToKilometersPerHour = (metersPerSecond: number) =>
+  Math.floor(metersPerSecond * 3.6);
+
 const Today: React.FC<TodayProps> = ({
   main: { temp, temp_max, temp_min },
   wind: { speed, deg },
@@ -233,7 +255,8 @@ const Today: React.FC<TodayProps> = ({
         temp_min,
       )}${tempSuffix}`}</MainInfo>
       <WindInfo>
-        Wind: {speed} {windSpeed} {windDirection(deg)} winds
+        Wind: {convertMetersPerSecondToKilometersPerHour(speed)} {windSpeedUnit}{" "}
+        {windDirection(deg)} winds
       </WindInfo>
     </TodayMain>
     <div>
