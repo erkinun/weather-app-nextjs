@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import dayjs from "dayjs";
 import Image from "next/image";
@@ -137,27 +137,39 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
     }
   };
 
-  const turnOnGeoLoc = (checked: Boolean) => {
-    if (checked) {
-      navigator.geolocation.getCurrentPosition(
-        function success(position) {
-          onGeoLoc({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        function error(e) {
-          console.log("some kind of failure: ", e);
-        },
-      );
-    }
+  const handleGeoLocCheckbox = (checked: boolean) => {
+    turnOnGeoLoc(checked);
     localStorage.setItem("geoLocation", checked.toString());
     setGeoLocation(checked as boolean);
   };
+
+  const turnOnGeoLoc = useCallback(
+    (checked: Boolean) => {
+      if (checked) {
+        navigator.geolocation.getCurrentPosition(
+          function success(position) {
+            console.log(position);
+            onGeoLoc({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            });
+          },
+          function error(e) {
+            console.log("some kind of failure: ", e);
+          },
+        );
+      }
+    },
+    [onGeoLoc],
+  );
   const [geoLocation, setGeoLocation] = useState<boolean>(false);
   useEffect(() => {
     setGeoLocation(localStorage.getItem("geoLocation") === "true");
   }, []);
+
+  useEffect(() => {
+    geoLocation && turnOnGeoLoc(true);
+  }, [geoLocation]);
   return (
     <HeaderDiv>
       <HeaderSearch>
@@ -174,7 +186,7 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
             checked={geoLocation}
             type="checkbox"
             name="geoLocation"
-            onChange={(e) => turnOnGeoLoc(e.target.checked)}
+            onChange={(e) => handleGeoLocCheckbox(e.target.checked)}
           />
           <label htmlFor="location">Use my location</label>
         </GeoSection>
