@@ -49,7 +49,7 @@ export const fetchWeather = async (
   if (latParam && lonParam) {
     console.log("we are in reverse geo fetch");
     const geoResponse = await fetch(
-      `http://api.openweathermap.org/geo/1.0/reverse?lat=${latParam}&lon=${lonParam}&appid=${API_KEY}`,
+      `https://api.openweathermap.org/geo/1.0/reverse?lat=${latParam}&lon=${lonParam}&appid=${API_KEY}`,
     );
 
     // reading the first response from the geo api
@@ -60,7 +60,7 @@ export const fetchWeather = async (
     }
   } else {
     const geoResponse = await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${loc}&appid=${API_KEY}`,
+      `https://api.openweathermap.org/geo/1.0/direct?q=${loc}&appid=${API_KEY}`,
     );
 
     // reading the first response from the geo api
@@ -73,13 +73,13 @@ export const fetchWeather = async (
 
   const [{ name: locationName, lat, lon }] = geoResult;
   const weatherResponse = await fetch(
-    `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
+    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
   );
   const { main, weather, wind, name, dt } = await weatherResponse.json();
 
   // 5 day forecast is available at any location on the globe. It includes weather forecast data with 3-hour step.
   const forecast = await fetch(
-    `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
+    `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`,
   );
 
   const { list } = await forecast.json();

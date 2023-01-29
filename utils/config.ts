@@ -17,7 +17,7 @@ type unitOptions = {
 const units: unitOptions = {
   metric: {
     temperature: "°C",
-    wind: "m/s",
+    wind: "km/h",
   },
 };
 

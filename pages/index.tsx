@@ -14,6 +14,8 @@ export default function Home(props: any) {
     const data = await fetchWeatherApi(params);
     if (!data.error) {
       setWeather(data);
+    } else {
+      console.error(data.error);
     }
   };
 
