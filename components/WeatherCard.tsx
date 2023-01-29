@@ -153,7 +153,7 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
       );
     }
     localStorage.setItem("geoLocation", checked.toString());
-    setGeoLocation(checked);
+    setGeoLocation(checked as boolean);
   };
   const [geoLocation, setGeoLocation] = useState<boolean>(false);
   useEffect(() => {
