@@ -148,7 +148,6 @@ const Header = React.forwardRef<HTMLInputElement, HeaderProps>(function Header(
       if (checked) {
         navigator.geolocation.getCurrentPosition(
           function success(position) {
-            console.log(position);
             onGeoLoc({
               lat: position.coords.latitude,
               lon: position.coords.longitude,
