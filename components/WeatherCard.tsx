@@ -261,7 +261,7 @@ const Today: React.FC<TodayProps> = ({
     </TodayMain>
     <div>
       <Image
-        src={`http://openweathermap.org/img/wn/${icon}@2x.png`}
+        src={`https://openweathermap.org/img/wn/${icon}@2x.png`}
         alt={main}
         width={100}
         height={100}
@@ -352,7 +352,7 @@ const Forecast: React.FC<ForecastProps> = ({ forecast: forecasts }) => (
             </div>
             <div>
               <ForecastListImage
-                src={`http://openweathermap.org/img/wn/${icon}@2x.png`}
+                src={`https://openweathermap.org/img/wn/${icon}@2x.png`}
                 alt={main}
               />
             </div>
